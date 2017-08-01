@@ -31,7 +31,7 @@ def calculate_probablility(tokens: list, token_counts: dict, delta=0.01):
     """
     Calculates the add-delta probability P(tokens | details)
     """
-    total_words_in_category = len(token_counts.keys())
+    total_words_in_category = sum(val for val in token_counts.values())
     probability = Decimal('1')
     for token in tokens:
         counts = token_counts.get(token, delta)
