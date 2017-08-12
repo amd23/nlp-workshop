@@ -1,63 +1,74 @@
 import csv
-from collections import defaultdict
+from collections import Counter
 from decimal import Decimal
 import sys
 
 
-def parse_csv(file_name: str):
-    """
-    Expects a csv with two rows; the first containing a category, and the second containing a sentence in that category.
-    """
-    category_to_sentence_details_map = {}
+class Classifier(object):
+    def __init__(self):
+        self.trained_data = {}
 
-    with open(file_name) as csv_file:
-        reader = csv.reader(csv_file)
-        for row in reader:
-            tokenized_sentence = tokenize(row[1])
-            if row[0] not in category_to_sentence_details_map:
-                category_to_sentence_details_map[row[0]] = defaultdict(int)
+    def train(self, file_name: str):
+        """
+        Expects a csv with two rows; the first containing a category, and the second containing a sentence in that category.
+        """
+        category_to_token_count_map = {}
 
-            for word in tokenized_sentence:
-                category_to_sentence_details_map[row[0]][word] += 1
+        with open(file_name, encoding="utf8") as csv_file:
+            reader = csv.reader(csv_file)
+            for row in reader:
+                tokenized_sentence = self.tokenize(row[1])
 
-    return category_to_sentence_details_map
+                if row[0] not in category_to_token_count_map:
+                    category_to_token_count_map[row[0]] = Counter()
 
+                for word in tokenized_sentence:
+                    category_to_token_count_map[row[0]][word] += 1
 
-def tokenize(sentence: str):
-    return sentence.lower().split()
+        self.trained_data = category_to_token_count_map
 
+    def tokenize(self, sentence: str):
+        return sentence.lower().split()
 
-def calculate_probablility(tokens: list, token_counts: dict, delta=0.01):
-    """
-    Calculates the add-delta probability P(tokens | details)
-    """
-    total_words_in_category = sum(val for val in token_counts.values())
-    probability = Decimal('1')
-    for token in tokens:
-        counts = token_counts.get(token, delta)
-        token_probability = Decimal(counts / total_words_in_category)
-        probability = probability * token_probability
+    def _calculate_probablility(self, classification: str, tokens: list, delta=0.01):
+        """
+        Calculates the add-delta probability P(tokens | details)
+        """
+        if classification not in self.trained_data:
+            return 0
 
-    return probability
+        token_counts = self.trained_data[classification]
+        total_words_in_category = sum(val for val in token_counts.values())
+        probability = Decimal('1')
+        for token in tokens:
+            counts = token_counts.get(token, delta)
+            token_probability = Decimal(counts / total_words_in_category)
+            probability = probability * token_probability
+
+        return probability
+
+    def classify(self, raw_input: str):
+        tokens = self.tokenize(raw_input)
+
+        max_probablility = float("-Inf")
+        most_likely_classification = None
+        for classification, token_counts in self.trained_data.items():
+            probability = self._calculate_probablility(classification, tokens)
+            if probability > max_probablility:
+                max_probablility = probability
+                most_likely_classification = classification
+
+        return most_likely_classification
 
 
 def main():
     csv_file_path = sys.argv[1]
-    category_to_token_map = parse_csv(csv_file_path)
+    classifier = Classifier()
+    classifier.train(csv_file_path)
 
     while 1:
         new_input = input('Enter a new sentence: ')
-        tokenized_input = tokenize(new_input)
-
-        max_probablility = float('-Inf')
-        most_likely_category = None
-        for category, token_counts in category_to_token_map.items():
-            probability = calculate_probablility(tokenized_input, token_counts)
-            if probability > max_probablility:
-                max_probablility = probability
-                most_likely_category = category
-
-        print('Most likely category: {}'.format(most_likely_category))
+        print('Most likely category: {}'.format(classifier.classify(new_input)))
 
 
 if __name__ == '__main__':
