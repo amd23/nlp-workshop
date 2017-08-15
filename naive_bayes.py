@@ -13,7 +13,7 @@ class Classifier(object):
         cleaned_string = re.sub("[\W]", " ", sentence)
         return cleaned_string.lower().split()
 
-    def _calculate_probablility(self, classification: str, tokens: list, delta=0.01):
+    def _calculate_probablility(self, classification: str, tokens: list, delta=1):
         """
         Calculates the add-delta probability P(tokens | details)
         """
@@ -29,7 +29,7 @@ class Classifier(object):
             probability = probability * token_probability
 
         return probability
-        
+
     def train(self, file_name: str):
         """
         Expects a csv with two rows; the first containing a category, and the second containing a sentence in that category.
@@ -71,6 +71,7 @@ def main():
     while 1:
         new_input = input('Enter a new sentence: ')
         print('Most likely category: {}'.format(classifier.classify(new_input)))
+        print("")
 
 
 if __name__ == '__main__':
