@@ -13,7 +13,7 @@ class Classifier(object):
         cleaned_string = re.sub("[\W]", " ", sentence)
         return cleaned_string.lower().split()
 
-    def _calculate_probablility(self, classification: str, tokens: list, delta=1):
+    def _calculate_probablility(self, classification: str, tokens: list, delta=0.01):
         """
         Calculates the add-delta probability P(tokens | details)
         """
