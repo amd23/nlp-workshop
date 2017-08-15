@@ -1,6 +1,5 @@
 import csv
 from collections import Counter
-from decimal import Decimal
 import re
 import sys
 
@@ -13,22 +12,11 @@ class Classifier(object):
         cleaned_string = re.sub("[\W]", " ", sentence)
         return cleaned_string.lower().split()
 
-    def _calculate_probablility(self, classification: str, tokens: list, delta=0.01):
+    def _calculate_probablility(self, classification: str, tokens: list):
         """
-        Calculates the add-delta probability P(tokens | details)
+        Calculates the probability of `tokens` being in `classification`
         """
-        if classification not in self.trained_data:
-            return 0
-
-        token_counts = self.trained_data[classification]
-        total_words_in_category = sum(val for val in token_counts.values())
-        probability = Decimal('1')
-        for token in tokens:
-            counts = token_counts.get(token, delta)
-            token_probability = Decimal(counts / total_words_in_category)
-            probability = probability * token_probability
-
-        return probability
+        return 0
 
     def train(self, file_name: str):
         """
@@ -71,7 +59,7 @@ def main():
     while 1:
         new_input = input('Enter a new sentence: ')
         print('Most likely category: {}'.format(classifier.classify(new_input)))
-        print("")
+        print('')
 
 
 if __name__ == '__main__':
