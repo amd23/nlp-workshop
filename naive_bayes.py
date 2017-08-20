@@ -22,10 +22,11 @@ class Classifier(object):
 
         token_counts = self.trained_data[classification]
         total_words_in_category = sum(val for val in token_counts.values())
+        vocab_size = len(token_counts.keys())
         probability = Decimal('1')
         for token in tokens:
-            counts = token_counts.get(token, delta)
-            token_probability = Decimal(counts / total_words_in_category)
+            counts = Decimal(token_counts.get(token, 0) + delta)
+            token_probability = counts / (total_words_in_category + (delta * vocab_size))
             probability = probability * token_probability
 
         return probability
