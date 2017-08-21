@@ -61,6 +61,9 @@ class Classifier(object):
                 max_probablility = probability
                 most_likely_classification = classification
 
+        if max_probablility == Decimal("0"):
+            raise Exception("No classification found")
+
         return most_likely_classification
 
 
