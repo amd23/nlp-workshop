@@ -48,7 +48,7 @@ class Classifier(object):
         probability, most_likely_classification = max([
             (self._calculate_probablility(trained_data, classification, tokens), classification)
             for classification in trained_data.keys()
-        ] + [(float("-Inf"), None)])
+        ] + [(Decimal("0"), None)])
 
         if probability == Decimal("0"):
             raise Exception("No classification found")
